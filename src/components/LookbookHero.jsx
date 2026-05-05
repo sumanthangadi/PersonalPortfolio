@@ -295,8 +295,8 @@ function MobileLayout() {
       {/* ── ABOUT ── */}
       <section className="mobile-section" style={{ minHeight: 'auto' }}>
         <div className="mobile-section-label">{sectionLabels[0]}</div>
-        <div style={{ width: '90vw', maxWidth: '400px', marginBottom: '1rem', WebkitMaskImage: 'linear-gradient(to bottom, #000 70%, transparent 100%)', maskImage: 'linear-gradient(to bottom, #000 70%, transparent 100%)' }}>
-          <img src="/cutouts/mobile.png" alt="Sumanth" style={{ width: '100%', display: 'block' }} />
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginBottom: '1rem', WebkitMaskImage: 'linear-gradient(to bottom, #000 70%, transparent 100%)', maskImage: 'linear-gradient(to bottom, #000 70%, transparent 100%)' }}>
+          <img src="/cutouts/mobile.png" alt="Sumanth" style={{ maxWidth: '90vw', maxHeight: '60vh', width: 'auto', height: 'auto', display: 'block', objectFit: 'contain' }} />
         </div>
         <div className="mobile-content mobile-reveal" ref={addRevealRef}>
           <div>
