@@ -273,7 +273,7 @@ function MobileLayout() {
   const sectionLabels = ['01 — About', '02 — Education', '03 — Skills', '04 — Projects', '05 — Contact'];
 
   return (
-    <div style={{ backgroundColor: '#fff', color: '#000' }}>
+    <div className="animate-entry" style={{ backgroundColor: '#fff', color: '#000' }}>
 
       {/* Desktop suggestion toast */}
       <div style={{
@@ -527,7 +527,7 @@ export default function LookbookHero() {
     <div ref={sectionRef} style={{ height: wrapperHeight, width: '100%', position: 'relative' }}>
 
       <div style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'hidden', background: '#fff', display: 'flex', alignItems: 'center' }}>
-
+        <div className="animate-entry" style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}>
         {/* Strip */}
         <div
           style={{
