@@ -19,6 +19,23 @@
   padding: 0;
 }
 
+@keyframes pageFadeIn {
+  0% {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(15px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0px);
+    transform: translateY(0);
+  }
+}
+
+#root {
+  animation: pageFadeIn 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
