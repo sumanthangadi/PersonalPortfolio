@@ -272,7 +272,7 @@ function MobileLayout() {
       {/* Desktop suggestion toast */}
       <div style={{
         position: 'fixed',
-        bottom: '2rem',
+        top: '2rem',
         left: '50%',
         transform: 'translateX(-50%)',
         backgroundColor: '#111',
