@@ -286,8 +286,12 @@ function MobileLayout() {
         opacity: showToast ? 1 : 0,
         transition: 'opacity 0.5s ease',
         pointerEvents: 'none',
-        whiteSpace: 'nowrap',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
+        whiteSpace: 'normal',
+        width: '90vw',
+        maxWidth: '320px',
+        textAlign: 'center',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+        boxSizing: 'border-box'
       }}>
         Please view on desktop for the best experience
       </div>
