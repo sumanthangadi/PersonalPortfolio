@@ -232,11 +232,17 @@ const renderPanelItem = (item, idx, isRight, isActive) => {
 // ── Mobile Layout Component ──
 function MobileLayout() {
   const revealRefs = useRef([]);
-  const [showToast, setShowToast] = useState(true);
+  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowToast(false), 3000);
-    return () => clearTimeout(timer);
+    // Fade in shortly after mount
+    const fadeIn = setTimeout(() => setShowToast(true), 100);
+    // Fade out after 3.5 seconds
+    const fadeOut = setTimeout(() => setShowToast(false), 3500);
+    return () => {
+      clearTimeout(fadeIn);
+      clearTimeout(fadeOut);
+    };
   }, []);
 
   useEffect(() => {
