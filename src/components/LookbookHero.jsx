@@ -701,6 +701,7 @@ export default function LookbookHero() {
           </span>
         </div>
 
+        </div>
       </div>
     </div>
   );
