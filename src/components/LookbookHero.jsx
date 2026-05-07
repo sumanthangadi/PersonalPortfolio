@@ -273,7 +273,7 @@ function MobileLayout() {
   const sectionLabels = ['01 — About', '02 — Education', '03 — Skills', '04 — Projects', '05 — Contact'];
 
   return (
-    <div className="animate-entry" style={{ backgroundColor: '#fff', color: '#000' }}>
+    <div style={{ backgroundColor: '#fff', color: '#000' }}>
 
       {/* Desktop suggestion toast */}
       <div style={{
@@ -527,182 +527,180 @@ export default function LookbookHero() {
     <div ref={sectionRef} style={{ height: wrapperHeight, width: '100%', position: 'relative' }}>
 
       <div style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'hidden', background: '#fff', display: 'flex', alignItems: 'center' }}>
-        <div className="animate-entry" style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}>
-        {/* Strip */}
-        <div
-          style={{
-            position: 'relative',
-            width: '100%',
-            transform: `translateX(${stripTranslateX}px)`,
-            willChange: 'transform'
-          }}
-        >
-          {cutouts.map((src, i) => {
-            const isActive = i === activeIndex;
+          {/* Strip */}
+          <div
+            style={{
+              position: 'relative',
+              width: '100%',
+              transform: `translateX(${stripTranslateX}px)`,
+              willChange: 'transform'
+            }}
+          >
+            {cutouts.map((src, i) => {
+              const isActive = i === activeIndex;
 
-            // Continuous scroll interpolation
-            const x = i * visualSpacing;
-            const distance = Math.abs(x - visualProgress);
+              // Continuous scroll interpolation
+              const x = i * visualSpacing;
+              const distance = Math.abs(x - visualProgress);
 
-            // Normalized progress from 0 (far) to 1 (center)
-            let rawProgress = Math.max(0, 1 - distance / visualSpacing);
-            // Smoothstep curve for elegant ease-in and ease-out
-            const progress = rawProgress * rawProgress * (3 - 2 * rawProgress);
+              // Normalized progress from 0 (far) to 1 (center)
+              let rawProgress = Math.max(0, 1 - distance / visualSpacing);
+              // Smoothstep curve for elegant ease-in and ease-out
+              const progress = rawProgress * rawProgress * (3 - 2 * rawProgress);
 
-            // Interpolated values
-            const currentHeight = 50 + (140 * progress);
-            const currentOpacity = 0.4 + (0.6 * progress);
-            const currentGrayscale = 30 * (1 - progress);
-            const currentTranslateY = 40 * progress;
+              // Interpolated values
+              const currentHeight = 50 + (140 * progress);
+              const currentOpacity = 0.4 + (0.6 * progress);
+              const currentGrayscale = 30 * (1 - progress);
+              const currentTranslateY = 40 * progress;
 
-            const leftOffset = i === 4 ? -80 : 0; // Shift contact cutout left
+              const leftOffset = i === 4 ? -80 : 0; // Shift contact cutout left
 
-            return (
+              return (
+                <div
+                  key={i}
+                  style={{
+                    position: 'absolute',
+                    left: x + leftOffset,
+                    top: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: isActive ? 10 : 1
+                  }}
+                >
+                  <img
+                    src={src}
+                    alt={`Lookbook Cutout ${i + 1}`}
+                    style={{
+                      height: `${currentHeight}vh`,
+                      opacity: currentOpacity,
+                      filter: `grayscale(${currentGrayscale}%)`,
+                      transform: `translateY(${currentTranslateY}vh)`,
+                      objectFit: 'contain',
+                      transformOrigin: 'center center',
+                      willChange: 'height, opacity, filter, transform'
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Floating Icons — Skills Slide */}
+          {[
+            { icon: 'react', top: '15%', left: '5%', size: 36, delay: '0s', dur: '6s' },
+            { icon: 'nodejs', top: '20%', left: '88%', size: 30, delay: '1s', dur: '7s' },
+            { icon: 'firebase', top: '70%', left: '6%', size: 28, delay: '2s', dur: '5s' },
+            { icon: 'reactNative', top: '75%', left: '87%', size: 32, delay: '0.5s', dur: '8s' },
+            { icon: 'data', top: '45%', left: '3%', size: 24, delay: '1.5s', dur: '6.5s' },
+            { icon: 'github', top: '10%', left: '50%', size: 26, delay: '0.8s', dur: '7.5s' },
+            { icon: 'react', top: '80%', left: '45%', size: 20, delay: '2.5s', dur: '5.5s' },
+            { icon: 'firebase', top: '35%', left: '92%', size: 22, delay: '3s', dur: '9s' },
+          ].map((item, i) => (
+            <div key={`float-${i}`} style={{
+              position: 'absolute',
+              top: item.top,
+              left: item.left,
+              opacity: activeIndex === 2 ? 0.15 : 0,
+              transition: 'opacity 0.8s ease',
+              animation: `floatIcon ${item.dur} ease-in-out ${item.delay} infinite`,
+              zIndex: 5,
+              pointerEvents: 'none',
+              color: '#000'
+            }}>
+              {getIcon(item.icon, item.size)}
+            </div>
+          ))}
+
+          {/* Text Panels */}
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '10%',
+            transform: 'translateY(-50%)',
+            opacity: 1, // The container itself is always visible, but we transition inner content
+            zIndex: 20,
+            pointerEvents: 'none'
+          }}>
+            {slideContent.map((content, i) => (
               <div
-                key={i}
+                key={`left-${i}`}
                 style={{
-                  position: 'absolute',
-                  left: x + leftOffset,
-                  top: '50%',
-                  transform: 'translate(-50%, -50%)',
+                  position: i === 0 ? 'relative' : 'absolute',
+                  top: i === 3 ? '-20vh' : 0,
+                  left: 0,
+                  pointerEvents: activeIndex === i ? 'auto' : 'none',
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  zIndex: isActive ? 10 : 1
+                  flexDirection: 'column',
+                  gap: '0.8rem'
                 }}
               >
-                <img
-                  src={src}
-                  alt={`Lookbook Cutout ${i + 1}`}
-                  style={{
-                    height: `${currentHeight}vh`,
-                    opacity: currentOpacity,
-                    filter: `grayscale(${currentGrayscale}%)`,
-                    transform: `translateY(${currentTranslateY}vh)`,
-                    objectFit: 'contain',
-                    transformOrigin: 'center center',
-                    willChange: 'height, opacity, filter, transform'
-                  }}
-                />
+                {content.left.map((item, idx) => renderPanelItem(item, idx, false, activeIndex === i))}
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
 
-        {/* Floating Icons — Skills Slide */}
-        {[
-          { icon: 'react', top: '15%', left: '5%', size: 36, delay: '0s', dur: '6s' },
-          { icon: 'nodejs', top: '20%', left: '88%', size: 30, delay: '1s', dur: '7s' },
-          { icon: 'firebase', top: '70%', left: '6%', size: 28, delay: '2s', dur: '5s' },
-          { icon: 'reactNative', top: '75%', left: '87%', size: 32, delay: '0.5s', dur: '8s' },
-          { icon: 'data', top: '45%', left: '3%', size: 24, delay: '1.5s', dur: '6.5s' },
-          { icon: 'github', top: '10%', left: '50%', size: 26, delay: '0.8s', dur: '7.5s' },
-          { icon: 'react', top: '80%', left: '45%', size: 20, delay: '2.5s', dur: '5.5s' },
-          { icon: 'firebase', top: '35%', left: '92%', size: 22, delay: '3s', dur: '9s' },
-        ].map((item, i) => (
-          <div key={`float-${i}`} style={{
+          <div style={{
             position: 'absolute',
-            top: item.top,
-            left: item.left,
-            opacity: activeIndex === 2 ? 0.15 : 0,
-            transition: 'opacity 0.8s ease',
-            animation: `floatIcon ${item.dur} ease-in-out ${item.delay} infinite`,
-            zIndex: 5,
+            top: '40%',
+            right: '2%',
+            transform: 'translateY(-50%)',
+            opacity: 1,
+            zIndex: 20,
             pointerEvents: 'none',
+            textAlign: 'right'
+          }}>
+            {slideContent.map((content, i) => (
+              <div
+                key={`right-${i}`}
+                style={{
+                  position: i === 0 ? 'relative' : 'absolute',
+                  top: i === 3 ? '-20vh' : 0,
+                  right: 0,
+                  pointerEvents: activeIndex === i ? 'auto' : 'none',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-end',
+                  gap: '0.8rem'
+                }}
+              >
+                {content.right.map((item, idx) => renderPanelItem(item, idx, true, activeIndex === i))}
+              </div>
+            ))}
+          </div>
+
+          {/* Scroll Hint for Contact Slide */}
+          <div style={{
+            position: 'absolute',
+            bottom: '4vh',
+            left: '5%',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: '1.2rem',
+            opacity: activeIndex === 4 ? 0.5 : 0,
+            transition: 'opacity 0.5s ease',
+            pointerEvents: 'none',
+            zIndex: 30,
             color: '#000'
           }}>
-            {getIcon(item.icon, item.size)}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}>
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <polyline points="19 12 12 19 5 12"></polyline>
+            </svg>
+            <span style={{
+              fontSize: '0.65rem',
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              fontWeight: 500
+            }}>
+              Scroll to view more
+            </span>
           </div>
-        ))}
-
-        {/* Text Panels */}
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '10%',
-          transform: 'translateY(-50%)',
-          opacity: 1, // The container itself is always visible, but we transition inner content
-          zIndex: 20,
-          pointerEvents: 'none'
-        }}>
-          {slideContent.map((content, i) => (
-            <div
-              key={`left-${i}`}
-              style={{
-                position: i === 0 ? 'relative' : 'absolute',
-                top: i === 3 ? '-20vh' : 0,
-                left: 0,
-                pointerEvents: activeIndex === i ? 'auto' : 'none',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.8rem'
-              }}
-            >
-              {content.left.map((item, idx) => renderPanelItem(item, idx, false, activeIndex === i))}
-            </div>
-          ))}
-        </div>
-
-        <div style={{
-          position: 'absolute',
-          top: '40%',
-          right: '2%',
-          transform: 'translateY(-50%)',
-          opacity: 1,
-          zIndex: 20,
-          pointerEvents: 'none',
-          textAlign: 'right'
-        }}>
-          {slideContent.map((content, i) => (
-            <div
-              key={`right-${i}`}
-              style={{
-                position: i === 0 ? 'relative' : 'absolute',
-                top: i === 3 ? '-20vh' : 0,
-                right: 0,
-                pointerEvents: activeIndex === i ? 'auto' : 'none',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-end',
-                gap: '0.8rem'
-              }}
-            >
-              {content.right.map((item, idx) => renderPanelItem(item, idx, true, activeIndex === i))}
-            </div>
-          ))}
-        </div>
-
-        {/* Scroll Hint for Contact Slide */}
-        <div style={{
-          position: 'absolute',
-          bottom: '4vh',
-          left: '5%',
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: '1.2rem',
-          opacity: activeIndex === 4 ? 0.5 : 0,
-          transition: 'opacity 0.5s ease',
-          pointerEvents: 'none',
-          zIndex: 30,
-          color: '#000'
-        }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}>
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <polyline points="19 12 12 19 5 12"></polyline>
-          </svg>
-          <span style={{
-            fontSize: '0.65rem',
-            letterSpacing: '0.15em',
-            textTransform: 'uppercase',
-            fontWeight: 500
-          }}>
-            Scroll to view more
-          </span>
-        </div>
 
         </div>
       </div>
-    </div>
   );
 }
