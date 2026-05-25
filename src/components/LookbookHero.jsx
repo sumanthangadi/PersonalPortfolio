@@ -25,10 +25,10 @@ const slideContent = [
     left: [
       { type: 'heading', value: 'EDUCATION' },
       { label: 'MCA (2025 - 2027)', value: 'Master of Computer Application', nowrap: true },
-      { label: '', value: 'PES University Bengaluru', style: { fontSize: '1rem', marginTop: '-0.5rem', opacity: 0.8, textTransform: 'uppercase' } },
+      { label: '', value: 'PES University Bengaluru', style: { fontSize: '1rem', marginTop: '-0.5rem', opacity: 0.8, textTransform: 'uppercase' }, link: 'https://maps.app.goo.gl/jn3pAzoAXdEUeVUK8' },
       { type: 'divider', style: { width: '200px', opacity: 0.1, margin: '1.5rem 0' } },
       { label: 'BCA (2022 - 2025)', value: 'Bachelor of Computer Applications', nowrap: true },
-      { label: '', value: 'KLE BCA Hubli', style: { fontSize: '1rem', marginTop: '-0.5rem', opacity: 0.8, textTransform: 'uppercase' } }
+      { label: '', value: 'KLE BCA Hubli', style: { fontSize: '1rem', marginTop: '-0.5rem', opacity: 0.8, textTransform: 'uppercase' }, link: 'https://maps.app.goo.gl/hotpV5P9Lu6qh56h9' }
     ],
     right: []
   },
@@ -216,6 +216,18 @@ const renderPanelItem = (item, idx, isRight, isActive) => {
     );
   }
 
+  const valueContent = item.link ? (
+    <a href={item.link} target="_blank" rel="noreferrer" style={{
+      color: 'inherit',
+      textDecoration: 'none',
+      borderBottom: '1px solid currentColor',
+      paddingBottom: '2px',
+      opacity: 1,
+      transition: 'opacity 0.3s ease',
+      pointerEvents: 'auto'
+    }}>{item.value} ↗</a>
+  ) : item.value;
+
   return (
     <div key={idx} style={{ display: 'flex', flexDirection: 'column', ...alignStyle, ...animStyle, ...(item.containerStyle || {}) }}>
       <div className="editorial-label" style={item.labelStyle || {}}>{item.label}</div>
@@ -223,7 +235,7 @@ const renderPanelItem = (item, idx, isRight, isActive) => {
         whiteSpace: item.nowrap ? 'nowrap' : 'normal',
         maxWidth: (isRight || item.nowrap) ? 'none' : '400px',
         ...(item.style || {})
-      }}>{item.value}</div>
+      }}>{valueContent}</div>
     </div>
   );
 };
@@ -327,19 +339,19 @@ function MobileLayout() {
       </section>
 
       {/* ── EDUCATION ── */}
-      <section className="mobile-section" style={{ backgroundColor: '#fafafa', minHeight: 'auto' }}>
-        <div className="mobile-section-label">{sectionLabels[1]}</div>
+      <section className="mobile-section" style={{ backgroundColor: '#111', color: '#fff', minHeight: 'auto' }}>
+        <div className="mobile-section-label" style={{ color: '#666' }}>{sectionLabels[1]}</div>
         <div className="mobile-content mobile-reveal" ref={addRevealRef}>
           <div>
-            <div className="editorial-label">MCA (2025 - 2027)</div>
-            <div className="editorial-value">Master of Computer Application</div>
-            <div className="editorial-label" style={{ marginTop: '0.2rem', textTransform: 'uppercase', opacity: 0.8 }}>PES University Bengaluru</div>
+            <div className="editorial-label" style={{ color: '#888' }}>MCA (2025 - 2027)</div>
+            <div className="editorial-value" style={{ color: '#fff' }}>Master of Computer Application</div>
+            <a href="https://maps.app.goo.gl/jn3pAzoAXdEUeVUK8" target="_blank" rel="noreferrer" className="editorial-label" style={{ marginTop: '0.2rem', textTransform: 'uppercase', opacity: 0.8, color: '#888', textDecoration: 'none', borderBottom: '1px solid #444', paddingBottom: '2px', display: 'inline-block' }}>PES University Bengaluru ↗</a>
           </div>
-          <div className="mobile-divider"></div>
+          <div className="mobile-divider" style={{ background: '#fff' }}></div>
           <div>
-            <div className="editorial-label">BCA (2022 - 2025)</div>
-            <div className="editorial-value">Bachelor of Computer Applications</div>
-            <div className="editorial-label" style={{ marginTop: '0.2rem', textTransform: 'uppercase', opacity: 0.8 }}>KLE BCA Hubli</div>
+            <div className="editorial-label" style={{ color: '#888' }}>BCA (2022 - 2025)</div>
+            <div className="editorial-value" style={{ color: '#fff' }}>Bachelor of Computer Applications</div>
+            <a href="https://maps.app.goo.gl/hotpV5P9Lu6qh56h9" target="_blank" rel="noreferrer" className="editorial-label" style={{ marginTop: '0.2rem', textTransform: 'uppercase', opacity: 0.8, color: '#888', textDecoration: 'none', borderBottom: '1px solid #444', paddingBottom: '2px', display: 'inline-block' }}>KLE BCA Hubli ↗</a>
           </div>
         </div>
       </section>
@@ -367,58 +379,58 @@ function MobileLayout() {
       </section>
 
       {/* ── PROJECTS ── */}
-      <section className="mobile-section" style={{ backgroundColor: '#fafafa', minHeight: 'auto' }}>
-        <div className="mobile-section-label">{sectionLabels[3]}</div>
+      <section className="mobile-section" style={{ backgroundColor: '#111', color: '#fff', minHeight: 'auto' }}>
+        <div className="mobile-section-label" style={{ color: '#666' }}>{sectionLabels[3]}</div>
         <div className="mobile-content mobile-reveal" ref={addRevealRef}>
           {/* Habit Tracker */}
           <div>
-            <div className="editorial-label">Project</div>
-            <div className="editorial-value">Habit Tracker Ecosystem</div>
+            <div className="editorial-label" style={{ color: '#888' }}>Project</div>
+            <div className="editorial-value" style={{ color: '#fff' }}>Habit Tracker Ecosystem</div>
           </div>
           <div>
-            <div className="editorial-label">Description</div>
-            <div style={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1rem', lineHeight: 1.5 }}>
+            <div className="editorial-label" style={{ color: '#888' }}>Description</div>
+            <div style={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1rem', lineHeight: 1.5, color: '#ccc' }}>
               Mobile app, web app & bookmark extension that manages bookmarks and habits.
             </div>
-            <div className="editorial-label" style={{ marginTop: '0.5rem' }}>Stack</div>
-            <div style={{ fontFamily: '"Montserrat", sans-serif', fontSize: '0.9rem', opacity: 0.8 }}>
+            <div className="editorial-label" style={{ marginTop: '0.5rem', color: '#888' }}>Stack</div>
+            <div style={{ fontFamily: '"Montserrat", sans-serif', fontSize: '0.9rem', opacity: 0.8, color: '#ccc' }}>
               React-Native, ReactJS, Firebase
             </div>
           </div>
           <div>
-            <div className="editorial-label">Links</div>
+            <div className="editorial-label" style={{ color: '#888' }}>Links</div>
             <div className="mobile-links-row">
-              <a href="https://github.com/sumanthangadi/habittrackerbackend" target="_blank" rel="noreferrer" className="editorial-button">{getIcon('github', 16)} GitHub</a>
-              <span style={{ opacity: 0.15 }}>|</span>
-              <a href="https://habit-tracker-public-one.vercel.app/today" target="_blank" rel="noreferrer" className="editorial-button">{getIcon('preview', 16)} Live Preview</a>
-              <span style={{ opacity: 0.15 }}>|</span>
-              <a href="https://github.com/sumanthangadi/BookmarksManager" target="_blank" rel="noreferrer" className="editorial-button">{getIcon('bookmark', 16)} Bookmark</a>
+              <a href="https://github.com/sumanthangadi/habittrackerbackend" target="_blank" rel="noreferrer" className="editorial-button" style={{ color: '#fff' }}>{getIcon('github', 16)} GitHub</a>
+              <span style={{ opacity: 0.15, color: '#fff' }}>|</span>
+              <a href="https://habit-tracker-public-one.vercel.app/today" target="_blank" rel="noreferrer" className="editorial-button" style={{ color: '#fff' }}>{getIcon('preview', 16)} Live Preview</a>
+              <span style={{ opacity: 0.15, color: '#fff' }}>|</span>
+              <a href="https://github.com/sumanthangadi/BookmarksManager" target="_blank" rel="noreferrer" className="editorial-button" style={{ color: '#fff' }}>{getIcon('bookmark', 16)} Bookmark</a>
             </div>
           </div>
 
-          <div className="mobile-divider"></div>
+          <div className="mobile-divider" style={{ background: '#fff' }}></div>
 
           {/* Order Management */}
           <div>
-            <div className="editorial-label">Project</div>
-            <div className="editorial-value">Order Management System</div>
+            <div className="editorial-label" style={{ color: '#888' }}>Project</div>
+            <div className="editorial-value" style={{ color: '#fff' }}>Order Management System</div>
           </div>
           <div>
-            <div className="editorial-label">Description</div>
-            <div style={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1rem', lineHeight: 1.5 }}>
+            <div className="editorial-label" style={{ color: '#888' }}>Description</div>
+            <div style={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1rem', lineHeight: 1.5, color: '#ccc' }}>
               Manages orders and customers.
             </div>
-            <div className="editorial-label" style={{ marginTop: '0.5rem' }}>Stack</div>
-            <div style={{ fontFamily: '"Montserrat", sans-serif', fontSize: '0.9rem', opacity: 0.8 }}>
+            <div className="editorial-label" style={{ marginTop: '0.5rem', color: '#888' }}>Stack</div>
+            <div style={{ fontFamily: '"Montserrat", sans-serif', fontSize: '0.9rem', opacity: 0.8, color: '#ccc' }}>
               React JS, Node JS and MongoDB
             </div>
           </div>
           <div>
-            <div className="editorial-label">Links</div>
+            <div className="editorial-label" style={{ color: '#888' }}>Links</div>
             <div className="mobile-links-row">
-              <a href="https://github.com/sumanthangadi/order-management-backend" target="_blank" rel="noreferrer" className="editorial-button">{getIcon('github', 16)} GitHub</a>
-              <span style={{ opacity: 0.15 }}>|</span>
-              <a href="https://order-management-frontend-tau.vercel.app/dashboard" target="_blank" rel="noreferrer" className="editorial-button">{getIcon('preview', 16)} Live Preview</a>
+              <a href="https://github.com/sumanthangadi/order-management-backend" target="_blank" rel="noreferrer" className="editorial-button" style={{ color: '#fff' }}>{getIcon('github', 16)} GitHub</a>
+              <span style={{ opacity: 0.15, color: '#fff' }}>|</span>
+              <a href="https://order-management-frontend-tau.vercel.app/dashboard" target="_blank" rel="noreferrer" className="editorial-button" style={{ color: '#fff' }}>{getIcon('preview', 16)} Live Preview</a>
             </div>
           </div>
         </div>
