@@ -570,11 +570,11 @@ function MobileLayout({ isLoading }) {
         <div className="mobile-content mobile-reveal" ref={addRevealRef} style={{ zIndex: 1 }}>
           <div>
             <div className="editorial-label">Phone / WhatsApp</div>
-            <CopyableValue value="+91 9343337788" isRight={false} className="editorial-value" />
+            <CopyableValue value="+91 9343337788" isRight={false} className="editorial-value" style={{ fontSize: '1.2rem' }} />
           </div>
           <div style={{ marginTop: '0.5rem' }}>
             <div className="editorial-label">Email</div>
-            <CopyableValue value="sumanthangadi7@gmail.com" isRight={false} className="editorial-value" style={{ fontSize: '1.2rem' }} />
+            <CopyableValue value="sumanthangadi7@gmail.com" isRight={false} className="editorial-value" style={{ fontSize: '0.9rem' }} />
           </div>
           <div style={{ marginTop: '1rem' }}>
             <div className="editorial-label">Connect</div>
