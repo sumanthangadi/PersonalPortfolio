@@ -152,7 +152,7 @@ function App() {
         </div>
       )}
 
-      <LookbookHero />
+      <LookbookHero isLoading={isLoading} />
       
       {!isMobile && (
         <section id="projects-detail" className={isMobile ? 'mobile-projects-detail' : ''} style={{

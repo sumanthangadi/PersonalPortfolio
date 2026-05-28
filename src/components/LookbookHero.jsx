@@ -342,20 +342,22 @@ const renderPanelItem = (item, idx, isRight, isActive) => {
 
 
 // ── Mobile Layout Component ──
-function MobileLayout() {
+function MobileLayout({ isLoading }) {
   const revealRefs = useRef([]);
   const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
-    // Fade in shortly after mount
-    const fadeIn = setTimeout(() => setShowToast(true), 100);
-    // Fade out after 3.5 seconds
-    const fadeOut = setTimeout(() => setShowToast(false), 3500);
+    if (isLoading) return;
+
+    // Fade in shortly after the preloader finishes fading out
+    const fadeIn = setTimeout(() => setShowToast(true), 800);
+    // Stay visible longer (6.5 seconds) so the user has time to read it
+    const fadeOut = setTimeout(() => setShowToast(false), 7300);
     return () => {
       clearTimeout(fadeIn);
       clearTimeout(fadeOut);
     };
-  }, []);
+  }, [isLoading]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -589,7 +591,7 @@ function MobileLayout() {
   );
 }
 
-export default function LookbookHero() {
+export default function LookbookHero({ isLoading }) {
   const [isMobile, setIsMobile] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [windowWidth, setWindowWidth] = useState(0);
@@ -623,7 +625,7 @@ export default function LookbookHero() {
   }, [isMobile]);
 
   if (isMobile) {
-    return <MobileLayout />;
+    return <MobileLayout isLoading={isLoading} />;
   }
 
   // Configuration
