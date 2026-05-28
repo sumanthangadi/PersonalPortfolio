@@ -1,5 +1,78 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+const CopyableValue = ({ value, isRight, className, style }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (e) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div style={{ 
+      display: 'inline-flex', 
+      alignItems: 'center', 
+      gap: '0.5rem', 
+      justifyContent: isRight ? 'flex-end' : 'flex-start', 
+      pointerEvents: 'auto',
+      width: 'max-content'
+    }}>
+      <button 
+        onClick={handleCopy}
+        title="Copy to clipboard"
+        style={{
+          background: 'none',
+          border: 'none',
+          color: copied ? '#4CAF50' : 'inherit',
+          opacity: copied ? 1 : 0.4,
+          cursor: 'pointer',
+          padding: '6px',
+          display: 'flex',
+          alignItems: 'center',
+          transition: 'all 0.2s ease',
+          margin: 0
+        }}
+        onMouseEnter={(e) => { if (!copied) e.currentTarget.style.opacity = 1; }}
+        onMouseLeave={(e) => { if (!copied) e.currentTarget.style.opacity = 0.4; }}
+      >
+        {copied ? (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        ) : (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        )}
+      </button>
+      <span className={className} style={{ 
+        ...style 
+      }}>{value}</span>
+      {copied && (
+        <div style={{
+          position: 'fixed',
+          top: '2rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#111',
+          color: '#fff',
+          padding: '0.8rem 1.5rem',
+          borderRadius: '50px',
+          fontSize: '0.75rem',
+          letterSpacing: '0.15em',
+          textTransform: 'uppercase',
+          zIndex: 10000,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+          textAlign: 'center',
+          animation: 'toastFadeInOut 2s ease forwards',
+          whiteSpace: 'nowrap'
+        }}>
+          {value === '+91 9343337788' ? 'Phone number copied!' : 'Email address copied!'}
+        </div>
+      )}
+    </div>
+  );
+};
+
+
 
 
 const cutouts = [
@@ -67,7 +140,12 @@ const slideContent = [
       { label: 'Stack', value: 'React JS, Node JS and MongoDB', style: { fontFamily: '"Montserrat", sans-serif', fontSize: '1rem', opacity: 0.8 } },
       { label: 'Links', type: 'links', github: 'https://github.com/sumanthangadi/order-management-backend', knowMore: '#projects-detail' }
     ],
-    right: []
+    right: [
+      { type: 'heading', value: 'MY PRODUCT', style: { fontSize: '1rem', opacity: 0.4, letterSpacing: '0.15em' }, containerStyle: { marginBottom: '0.2rem' } },
+      { label: 'Product', value: 'Folio', style: { fontSize: '2.2rem', fontWeight: 700, letterSpacing: '0.05em' } },
+      { label: '', value: 'I built and shipped a Chrome extension that replaces your new tab with a beautiful bookmark dashboard. Features organized sections, 7 themes, wallpapers, Google auth, and a full payment system — 30-day free trial, one-time ₹119 lifetime access. Live with real users.', style: { fontFamily: '"Montserrat", sans-serif', fontSize: '0.9rem', lineHeight: '1.6', maxWidth: '300px' } },
+      { label: 'Links', type: 'links', knowMore: '#projects-detail', extraBtn: { label: 'www.getfolio.tech', icon: 'preview', url: 'https://www.getfolio.tech' } }
+    ]
   },
   {
     left: [
@@ -93,8 +171,8 @@ const slideContent = [
       }
     ],
     right: [
-      { label: 'Phone / WhatsApp', value: '+91 9343337788' },
-      { label: 'Email', value: 'sumanthangadi7@gmail.com', style: { marginTop: '3rem' }, labelStyle: { marginBottom: 0 }, nowrap: true },
+      { label: 'Phone / WhatsApp', value: '+91 9343337788', copyable: true },
+      { label: 'Email', value: 'sumanthangadi7@gmail.com', containerStyle: { marginTop: '3.5rem' }, labelStyle: { marginBottom: 0 }, nowrap: true, copyable: true },
       {
         type: 'contactActions',
         label: 'Connect',
@@ -112,6 +190,7 @@ const getIcon = (name, size = 18) => {
     case 'github': return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>;
     case 'preview': return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>;
     case 'bookmark': return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>;
+    case 'chrome': return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="21.17" y1="8" x2="12" y2="8"></line><line x1="3.95" y1="6.06" x2="8.54" y2="14"></line><line x1="10.88" y1="21.94" x2="15.46" y2="14"></line></svg>;
     case 'whatsapp': return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>;
     case 'email': return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>;
     case 'knowMore': return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>;
@@ -126,7 +205,15 @@ const getIcon = (name, size = 18) => {
 
 const renderPanelItem = (item, idx, isRight, isActive) => {
   const alignStyle = isRight ? { alignItems: 'flex-end', textAlign: 'right' } : { alignItems: 'flex-start', textAlign: 'left' };
-  const linksStyle = { display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.2rem', pointerEvents: 'auto', justifyContent: isRight ? 'flex-end' : 'flex-start' };
+  const linksStyle = {
+    display: 'flex',
+    flexDirection: isRight ? 'column' : 'row',
+    alignItems: isRight ? 'flex-end' : 'center',
+    gap: isRight ? '0.5rem' : '1rem',
+    marginTop: '0.2rem',
+    pointerEvents: 'auto',
+    justifyContent: isRight ? 'flex-end' : 'flex-start'
+  };
   const animStyle = {
     opacity: isActive ? 1 : 0,
     transform: isActive ? 'translateY(0)' : 'translateY(20px)',
@@ -144,15 +231,26 @@ const renderPanelItem = (item, idx, isRight, isActive) => {
 
   if (item.type === 'links') {
     return (
-      <div key={idx} style={{ display: 'flex', flexDirection: 'column', ...alignStyle, ...animStyle }}>
+      <div key={idx} style={{ display: 'flex', flexDirection: 'column', ...alignStyle, ...animStyle, ...(item.containerStyle || {}) }}>
         <div className="editorial-label">{item.label}</div>
         <div style={linksStyle}>
-          {item.github && <a href={item.github} target="_blank" rel="noreferrer" className="editorial-button">{getIcon('github')} GitHub</a>}
-          {item.github && (item.preview || item.knowMore || item.extraBtn) && <span style={{ color: '#000', opacity: 0.2 }}>|</span>}
-          {item.preview && <a href={item.preview} target="_blank" rel="noreferrer" className="editorial-button">{getIcon('preview')} Preview</a>}
-          {item.knowMore && <a href={item.knowMore} className="editorial-button">{getIcon('knowMore')} Know More</a>}
-          {(item.preview || item.knowMore) && item.extraBtn && <span style={{ color: '#000', opacity: 0.2 }}>|</span>}
-          {item.extraBtn && <a href={item.extraBtn.url} target="_blank" rel="noreferrer" className="editorial-button">{getIcon(item.extraBtn.icon)} {item.extraBtn.label}</a>}
+          {isRight ? (
+            <>
+              {item.extraBtn && <a href={item.extraBtn.url} target="_blank" rel="noreferrer" className="editorial-button">{getIcon(item.extraBtn.icon)} {item.extraBtn.label}</a>}
+              {item.preview && <a href={item.preview} target="_blank" rel="noreferrer" className="editorial-button">{getIcon('preview')} Preview</a>}
+              {item.knowMore && <a href={item.knowMore} className="editorial-button">{getIcon('knowMore')} Know More</a>}
+              {item.github && <a href={item.github} target="_blank" rel="noreferrer" className="editorial-button">{getIcon('github')} GitHub</a>}
+            </>
+          ) : (
+            <>
+              {item.github && <a href={item.github} target="_blank" rel="noreferrer" className="editorial-button">{getIcon('github')} GitHub</a>}
+              {item.github && (item.preview || item.knowMore || item.extraBtn) && <span style={{ color: '#000', opacity: 0.2 }}>|</span>}
+              {item.preview && <a href={item.preview} target="_blank" rel="noreferrer" className="editorial-button">{getIcon('preview')} Preview</a>}
+              {item.knowMore && <a href={item.knowMore} className="editorial-button">{getIcon('knowMore')} Know More</a>}
+              {(item.preview || item.knowMore) && item.extraBtn && <span style={{ color: '#000', opacity: 0.2 }}>|</span>}
+              {item.extraBtn && <a href={item.extraBtn.url} target="_blank" rel="noreferrer" className="editorial-button">{getIcon(item.extraBtn.icon)} {item.extraBtn.label}</a>}
+            </>
+          )}
         </div>
         {item.note && <div className="editorial-label" style={{ marginTop: '0.5rem', textTransform: 'none' }}>{item.note}</div>}
       </div>
@@ -173,7 +271,7 @@ const renderPanelItem = (item, idx, isRight, isActive) => {
     return (
       <div key={idx} style={{ display: 'flex', flexDirection: 'column', ...alignStyle, ...animStyle, marginTop: '2rem' }}>
         <div className="editorial-label">{item.label}</div>
-        <div style={{ ...linksStyle, gap: '2rem' }}>
+        <div style={{ ...linksStyle, flexDirection: 'row', alignItems: 'center', gap: '2rem' }}>
           {item.actions.map((action, aIdx) => (
             <React.Fragment key={aIdx}>
               {aIdx > 0 && <span style={{ color: '#000', opacity: 0.1 }}>|</span>}
@@ -226,6 +324,8 @@ const renderPanelItem = (item, idx, isRight, isActive) => {
       transition: 'opacity 0.3s ease',
       pointerEvents: 'auto'
     }}>{item.value} ↗</a>
+  ) : item.copyable ? (
+    <CopyableValue value={item.value} isRight={isRight} className="editorial-value" />
   ) : item.value;
 
   return (
@@ -433,6 +533,31 @@ function MobileLayout() {
               <a href="https://order-management-frontend-tau.vercel.app/dashboard" target="_blank" rel="noreferrer" className="editorial-button" style={{ color: '#fff' }}>{getIcon('preview', 16)} Live Preview</a>
             </div>
           </div>
+
+          <div className="mobile-divider" style={{ background: '#fff' }}></div>
+
+          {/* Folio Product */}
+          <div style={{ position: 'relative' }}>
+            <div style={{ display: 'inline-block', background: 'linear-gradient(135deg, #c9a84c, #f0d878)', color: '#111', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', padding: '0.25rem 0.7rem', borderRadius: '50px', marginBottom: '0.8rem' }}>MY PRODUCT</div>
+            <div className="editorial-label" style={{ color: '#888' }}>Product</div>
+            <div className="editorial-value" style={{ color: '#fff', fontSize: '1.8rem', fontWeight: 700, letterSpacing: '0.05em' }}>Folio</div>
+          </div>
+          <div>
+            <div className="editorial-label" style={{ color: '#888' }}>Description</div>
+            <div style={{ fontFamily: '"Montserrat", sans-serif', fontSize: '1rem', lineHeight: 1.5, color: '#ccc' }}>
+              Chrome extension that replaces your new tab with a beautiful bookmark dashboard. Features organized sections, 7 themes, wallpapers, Google auth, and a full payment system.
+            </div>
+            <div className="editorial-label" style={{ marginTop: '0.5rem', color: '#888' }}>Highlights</div>
+            <div style={{ fontFamily: '"Montserrat", sans-serif', fontSize: '0.9rem', opacity: 0.8, color: '#ccc' }}>
+              30-day free trial · ₹119 lifetime · Live with real users
+            </div>
+          </div>
+          <div>
+            <div className="editorial-label" style={{ color: '#888' }}>Links</div>
+            <div className="mobile-links-row">
+              <a href="https://www.getfolio.tech" target="_blank" rel="noreferrer" className="editorial-button" style={{ color: '#fff' }}>{getIcon('chrome', 16)} Visit Folio</a>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -443,11 +568,11 @@ function MobileLayout() {
         <div className="mobile-content mobile-reveal" ref={addRevealRef} style={{ zIndex: 1 }}>
           <div>
             <div className="editorial-label">Phone / WhatsApp</div>
-            <div className="editorial-value">+91 9343337788</div>
+            <CopyableValue value="+91 9343337788" isRight={false} className="editorial-value" />
           </div>
           <div style={{ marginTop: '0.5rem' }}>
             <div className="editorial-label">Email</div>
-            <div className="editorial-value" style={{ fontSize: '1.2rem' }}>sumanthangadi7@gmail.com</div>
+            <CopyableValue value="sumanthangadi7@gmail.com" isRight={false} className="editorial-value" style={{ fontSize: '1.2rem' }} />
           </div>
           <div style={{ marginTop: '1rem' }}>
             <div className="editorial-label">Connect</div>
@@ -539,180 +664,180 @@ export default function LookbookHero() {
     <div ref={sectionRef} style={{ height: wrapperHeight, width: '100%', position: 'relative' }}>
 
       <div style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'hidden', background: '#fff', display: 'flex', alignItems: 'center' }}>
-          {/* Strip */}
-          <div
-            style={{
-              position: 'relative',
-              width: '100%',
-              transform: `translateX(${stripTranslateX}px)`,
-              willChange: 'transform'
-            }}
-          >
-            {cutouts.map((src, i) => {
-              const isActive = i === activeIndex;
+        {/* Strip */}
+        <div
+          style={{
+            position: 'relative',
+            width: '100%',
+            transform: `translateX(${stripTranslateX}px)`,
+            willChange: 'transform'
+          }}
+        >
+          {cutouts.map((src, i) => {
+            const isActive = i === activeIndex;
 
-              // Continuous scroll interpolation
-              const x = i * visualSpacing;
-              const distance = Math.abs(x - visualProgress);
+            // Continuous scroll interpolation
+            const x = i * visualSpacing;
+            const distance = Math.abs(x - visualProgress);
 
-              // Normalized progress from 0 (far) to 1 (center)
-              let rawProgress = Math.max(0, 1 - distance / visualSpacing);
-              // Smoothstep curve for elegant ease-in and ease-out
-              const progress = rawProgress * rawProgress * (3 - 2 * rawProgress);
+            // Normalized progress from 0 (far) to 1 (center)
+            let rawProgress = Math.max(0, 1 - distance / visualSpacing);
+            // Smoothstep curve for elegant ease-in and ease-out
+            const progress = rawProgress * rawProgress * (3 - 2 * rawProgress);
 
-              // Interpolated values
-              const currentHeight = 50 + (140 * progress);
-              const currentOpacity = 0.4 + (0.6 * progress);
-              const currentGrayscale = 30 * (1 - progress);
-              const currentTranslateY = 40 * progress;
+            // Interpolated values
+            const currentHeight = 50 + (140 * progress);
+            const currentOpacity = 0.4 + (0.6 * progress);
+            const currentGrayscale = 30 * (1 - progress);
+            const currentTranslateY = 40 * progress;
 
-              const leftOffset = i === 4 ? -80 : 0; // Shift contact cutout left
+            const leftOffset = i === 4 ? -80 : 0; // Shift contact cutout left
 
-              return (
-                <div
-                  key={i}
+            return (
+              <div
+                key={i}
+                style={{
+                  position: 'absolute',
+                  left: x + leftOffset,
+                  top: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: isActive ? 10 : 1
+                }}
+              >
+                <img
+                  src={src}
+                  alt={`Lookbook Cutout ${i + 1}`}
                   style={{
-                    position: 'absolute',
-                    left: x + leftOffset,
-                    top: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: isActive ? 10 : 1
+                    height: `${currentHeight}vh`,
+                    opacity: currentOpacity,
+                    filter: `grayscale(${currentGrayscale}%)`,
+                    transform: `translateY(${currentTranslateY}vh)`,
+                    objectFit: 'contain',
+                    transformOrigin: 'center center',
+                    willChange: 'height, opacity, filter, transform'
                   }}
-                >
-                  <img
-                    src={src}
-                    alt={`Lookbook Cutout ${i + 1}`}
-                    style={{
-                      height: `${currentHeight}vh`,
-                      opacity: currentOpacity,
-                      filter: `grayscale(${currentGrayscale}%)`,
-                      transform: `translateY(${currentTranslateY}vh)`,
-                      objectFit: 'contain',
-                      transformOrigin: 'center center',
-                      willChange: 'height, opacity, filter, transform'
-                    }}
-                  />
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Floating Icons — Skills Slide */}
-          {[
-            { icon: 'react', top: '15%', left: '5%', size: 36, delay: '0s', dur: '6s' },
-            { icon: 'nodejs', top: '20%', left: '88%', size: 30, delay: '1s', dur: '7s' },
-            { icon: 'firebase', top: '70%', left: '6%', size: 28, delay: '2s', dur: '5s' },
-            { icon: 'reactNative', top: '75%', left: '87%', size: 32, delay: '0.5s', dur: '8s' },
-            { icon: 'data', top: '45%', left: '3%', size: 24, delay: '1.5s', dur: '6.5s' },
-            { icon: 'github', top: '10%', left: '50%', size: 26, delay: '0.8s', dur: '7.5s' },
-            { icon: 'react', top: '80%', left: '45%', size: 20, delay: '2.5s', dur: '5.5s' },
-            { icon: 'firebase', top: '35%', left: '92%', size: 22, delay: '3s', dur: '9s' },
-          ].map((item, i) => (
-            <div key={`float-${i}`} style={{
-              position: 'absolute',
-              top: item.top,
-              left: item.left,
-              opacity: activeIndex === 2 ? 0.15 : 0,
-              transition: 'opacity 0.8s ease',
-              animation: `floatIcon ${item.dur} ease-in-out ${item.delay} infinite`,
-              zIndex: 5,
-              pointerEvents: 'none',
-              color: '#000'
-            }}>
-              {getIcon(item.icon, item.size)}
-            </div>
-          ))}
-
-          {/* Text Panels */}
-          <div style={{
-            position: 'absolute',
-            top: '50%',
-            left: '10%',
-            transform: 'translateY(-50%)',
-            opacity: 1, // The container itself is always visible, but we transition inner content
-            zIndex: 20,
-            pointerEvents: 'none'
-          }}>
-            {slideContent.map((content, i) => (
-              <div
-                key={`left-${i}`}
-                style={{
-                  position: i === 0 ? 'relative' : 'absolute',
-                  top: i === 3 ? '-20vh' : 0,
-                  left: 0,
-                  pointerEvents: activeIndex === i ? 'auto' : 'none',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.8rem'
-                }}
-              >
-                {content.left.map((item, idx) => renderPanelItem(item, idx, false, activeIndex === i))}
+                />
               </div>
-            ))}
-          </div>
+            );
+          })}
+        </div>
 
-          <div style={{
+        {/* Floating Icons — Skills Slide */}
+        {[
+          { icon: 'react', top: '15%', left: '5%', size: 36, delay: '0s', dur: '6s' },
+          { icon: 'nodejs', top: '20%', left: '88%', size: 30, delay: '1s', dur: '7s' },
+          { icon: 'firebase', top: '70%', left: '6%', size: 28, delay: '2s', dur: '5s' },
+          { icon: 'reactNative', top: '75%', left: '87%', size: 32, delay: '0.5s', dur: '8s' },
+          { icon: 'data', top: '45%', left: '3%', size: 24, delay: '1.5s', dur: '6.5s' },
+          { icon: 'github', top: '10%', left: '50%', size: 26, delay: '0.8s', dur: '7.5s' },
+          { icon: 'react', top: '80%', left: '45%', size: 20, delay: '2.5s', dur: '5.5s' },
+          { icon: 'firebase', top: '35%', left: '92%', size: 22, delay: '3s', dur: '9s' },
+        ].map((item, i) => (
+          <div key={`float-${i}`} style={{
             position: 'absolute',
-            top: '40%',
-            right: '2%',
-            transform: 'translateY(-50%)',
-            opacity: 1,
-            zIndex: 20,
+            top: item.top,
+            left: item.left,
+            opacity: activeIndex === 2 ? 0.15 : 0,
+            transition: 'opacity 0.8s ease',
+            animation: `floatIcon ${item.dur} ease-in-out ${item.delay} infinite`,
+            zIndex: 5,
             pointerEvents: 'none',
-            textAlign: 'right'
-          }}>
-            {slideContent.map((content, i) => (
-              <div
-                key={`right-${i}`}
-                style={{
-                  position: i === 0 ? 'relative' : 'absolute',
-                  top: i === 3 ? '-20vh' : 0,
-                  right: 0,
-                  pointerEvents: activeIndex === i ? 'auto' : 'none',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-end',
-                  gap: '0.8rem'
-                }}
-              >
-                {content.right.map((item, idx) => renderPanelItem(item, idx, true, activeIndex === i))}
-              </div>
-            ))}
-          </div>
-
-          {/* Scroll Hint for Contact Slide */}
-          <div style={{
-            position: 'absolute',
-            bottom: '4vh',
-            left: '5%',
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: '1.2rem',
-            opacity: activeIndex === 4 ? 0.5 : 0,
-            transition: 'opacity 0.5s ease',
-            pointerEvents: 'none',
-            zIndex: 30,
             color: '#000'
           }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}>
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <polyline points="19 12 12 19 5 12"></polyline>
-            </svg>
-            <span style={{
-              fontSize: '0.65rem',
-              letterSpacing: '0.15em',
-              textTransform: 'uppercase',
-              fontWeight: 500
-            }}>
-              Scroll to view more
-            </span>
+            {getIcon(item.icon, item.size)}
           </div>
+        ))}
 
+        {/* Text Panels */}
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '10%',
+          transform: 'translateY(-50%)',
+          opacity: 1, // The container itself is always visible, but we transition inner content
+          zIndex: 20,
+          pointerEvents: 'none'
+        }}>
+          {slideContent.map((content, i) => (
+            <div
+              key={`left-${i}`}
+              style={{
+                position: i === 0 ? 'relative' : 'absolute',
+                top: i === 3 ? '-20vh' : 0,
+                left: 0,
+                pointerEvents: activeIndex === i ? 'auto' : 'none',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.8rem'
+              }}
+            >
+              {content.left.map((item, idx) => renderPanelItem(item, idx, false, activeIndex === i))}
+            </div>
+          ))}
         </div>
+
+        <div style={{
+          position: 'absolute',
+          top: '40%',
+          right: activeIndex === 3 ? '14%' : '2%',
+          transform: 'translateY(-50%)',
+          opacity: 1,
+          zIndex: 20,
+          pointerEvents: 'none',
+          textAlign: 'right'
+        }}>
+          {slideContent.map((content, i) => (
+            <div
+              key={`right-${i}`}
+              style={{
+                position: i === 0 ? 'relative' : 'absolute',
+                top: i === 3 ? '-20vh' : 0,
+                right: 0,
+                pointerEvents: activeIndex === i ? 'auto' : 'none',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-end',
+                gap: '0.8rem'
+              }}
+            >
+              {content.right.map((item, idx) => renderPanelItem(item, idx, true, activeIndex === i))}
+            </div>
+          ))}
+        </div>
+
+        {/* Scroll Hint for Contact Slide */}
+        <div style={{
+          position: 'absolute',
+          bottom: '4vh',
+          left: '5%',
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: '1.2rem',
+          opacity: activeIndex === 4 ? 0.5 : 0,
+          transition: 'opacity 0.5s ease',
+          pointerEvents: 'none',
+          zIndex: 30,
+          color: '#000'
+        }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}>
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <polyline points="19 12 12 19 5 12"></polyline>
+          </svg>
+          <span style={{
+            fontSize: '0.65rem',
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
+            fontWeight: 500
+          }}>
+            Scroll to view more
+          </span>
+        </div>
+
       </div>
+    </div>
   );
 }

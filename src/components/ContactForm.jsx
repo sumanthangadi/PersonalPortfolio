@@ -69,7 +69,7 @@ const ContactForm = ({ isMobile }) => {
     <section id="contact-form" className={isMobile ? 'mobile-contact-form' : ''} style={{
       backgroundColor: '#111',
       color: '#fff',
-      padding: isMobile ? '6vh 6% 8vh' : '0 10% 10vh 10%',
+      padding: isMobile ? '6vh 6% 8vh' : '8vh 10% 10vh 10%',
       borderTop: '1px solid #222'
     }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
