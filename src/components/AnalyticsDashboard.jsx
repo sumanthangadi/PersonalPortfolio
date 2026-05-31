@@ -101,6 +101,21 @@ function CopyIP({ ip }) {
   );
 }
 
+function getVisitorColor(visitorId) {
+  if (!visitorId) return '#888888';
+  let hash = 0;
+  for (let i = 0; i < visitorId.length; i++) {
+    hash = visitorId.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const h = Math.abs(hash % 360);
+  return `hsl(${h}, 70%, 65%)`;
+}
+
+function getVisitorShortId(visitorId) {
+  if (!visitorId) return 'N/A';
+  return visitorId.substring(0, 8).toUpperCase();
+}
+
 // ── Stats Computation ──────────────────────────────────────
 
 function computeStats(visits) {
@@ -168,7 +183,13 @@ export default function AnalyticsDashboard() {
   const [visits, setVisits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
+  const [expandedHistoryId, setExpandedHistoryId] = useState(null);
   const [page, setPage] = useState(0);
+
+  const [dateFilter, setDateFilter] = useState('all');
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
+  const [isGrouped, setIsGrouped] = useState(false);
 
   const fetchVisits = async () => {
     setLoading(true);
@@ -187,10 +208,109 @@ export default function AnalyticsDashboard() {
     if (authed) fetchVisits();
   }, [authed]);
 
-  const stats = useMemo(() => computeStats(visits), [visits]);
+  const filteredVisits = useMemo(() => {
+    if (!visits || visits.length === 0) return [];
+    const now = new Date();
 
-  const totalPages = Math.ceil(visits.length / VISITS_PER_PAGE);
-  const paginatedVisits = visits.slice(page * VISITS_PER_PAGE, (page + 1) * VISITS_PER_PAGE);
+    return visits.filter(visit => {
+      let date;
+      if (visit.visitedAt?.toDate) {
+        date = visit.visitedAt.toDate();
+      } else if (visit.visitedAtLocal) {
+        date = new Date(visit.visitedAtLocal);
+      } else {
+        return dateFilter === 'all';
+      }
+
+      if (dateFilter === 'today') {
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        return date >= todayStart;
+      }
+      
+      if (dateFilter === 'yesterday') {
+        const yesterdayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        return date >= yesterdayStart && date < todayStart;
+      }
+
+      if (dateFilter === '7days') {
+        const limitDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        return date >= limitDate;
+      }
+
+      if (dateFilter === '30days') {
+        const limitDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        return date >= limitDate;
+      }
+
+      if (dateFilter === 'custom') {
+        if (customStartDate) {
+          const start = new Date(customStartDate);
+          start.setHours(0, 0, 0, 0);
+          if (date < start) return false;
+        }
+        if (customEndDate) {
+          const end = new Date(customEndDate);
+          end.setHours(23, 59, 59, 999);
+          if (date > end) return false;
+        }
+        return true;
+      }
+
+      return true; // 'all'
+    });
+  }, [visits, dateFilter, customStartDate, customEndDate]);
+
+  const groupedVisitors = useMemo(() => {
+    if (!isGrouped) return [];
+
+    const groups = {};
+    filteredVisits.forEach(visit => {
+      const vid = visit.visitorId || 'unknown';
+      if (!groups[vid]) {
+        groups[vid] = {
+          visitorId: vid,
+          visits: [],
+          totalTimeSpent: 0,
+          totalClicks: 0,
+          latestVisit: null,
+        };
+      }
+      groups[vid].visits.push(visit);
+      groups[vid].totalTimeSpent += (visit.timeSpentSeconds || 0);
+      groups[vid].totalClicks += (visit.totalClicks || 0);
+    });
+
+    return Object.values(groups).map(group => {
+      group.visits.sort((a, b) => {
+        const dateA = a.visitedAt?.toDate ? a.visitedAt.toDate() : new Date(a.visitedAtLocal || 0);
+        const dateB = b.visitedAt?.toDate ? b.visitedAt.toDate() : new Date(b.visitedAtLocal || 0);
+        return dateB - dateA;
+      });
+      group.latestVisit = group.visits[0];
+      return group;
+    }).sort((a, b) => {
+      const dateA = a.latestVisit.visitedAt?.toDate ? a.latestVisit.visitedAt.toDate() : new Date(a.latestVisit.visitedAtLocal || 0);
+      const dateB = b.latestVisit.visitedAt?.toDate ? b.latestVisit.visitedAt.toDate() : new Date(b.latestVisit.visitedAtLocal || 0);
+      return dateB - dateA;
+    });
+  }, [filteredVisits, isGrouped]);
+
+  useEffect(() => {
+    setExpandedId(null);
+    setExpandedHistoryId(null);
+    setPage(0);
+  }, [isGrouped, dateFilter, customStartDate, customEndDate]);
+
+  const stats = useMemo(() => computeStats(filteredVisits), [filteredVisits]);
+
+  const totalItems = isGrouped ? groupedVisitors.length : filteredVisits.length;
+  const totalPages = Math.ceil(totalItems / VISITS_PER_PAGE);
+
+  const paginatedItems = useMemo(() => {
+    const items = isGrouped ? groupedVisitors : filteredVisits;
+    return items.slice(page * VISITS_PER_PAGE, (page + 1) * VISITS_PER_PAGE);
+  }, [filteredVisits, groupedVisitors, isGrouped, page]);
 
   if (!authed) return <PasswordGate onAuth={() => setAuthed(true)} />;
 
@@ -291,160 +411,387 @@ export default function AnalyticsDashboard() {
         </div>
       </div>
 
+      {/* Controls: Date Filtering & Compressed Toggle */}
+      <div className="analytics-controls-bar">
+        <div className="controls-left">
+          <span className="control-label">Date Filter</span>
+          <div className="filter-btn-group">
+            {[
+              { id: 'all', label: 'All Time' },
+              { id: 'today', label: 'Today' },
+              { id: 'yesterday', label: 'Yesterday' },
+              { id: '7days', label: '7 Days' },
+              { id: '30days', label: '30 Days' },
+              { id: 'custom', label: 'Custom' }
+            ].map(f => (
+              <button
+                key={f.id}
+                className={`filter-btn ${dateFilter === f.id ? 'active' : ''}`}
+                onClick={() => setDateFilter(f.id)}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          {dateFilter === 'custom' && (
+            <div className="custom-date-inputs">
+              <input
+                type="date"
+                value={customStartDate}
+                onChange={e => setCustomStartDate(e.target.value)}
+                title="Start Date"
+              />
+              <span className="date-sep">to</span>
+              <input
+                type="date"
+                value={customEndDate}
+                onChange={e => setCustomEndDate(e.target.value)}
+                title="End Date"
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="controls-right">
+          <span className="control-label">View Mode</span>
+          <button
+            className={`view-mode-toggle ${isGrouped ? 'active' : ''}`}
+            onClick={() => setIsGrouped(!isGrouped)}
+          >
+            {isGrouped ? '👥 COMPRESSED (Group by Visitor)' : '📄 STANDARD (All Visits)'}
+          </button>
+        </div>
+      </div>
+
       {/* Visitors Table */}
       <div className="analytics-section full-width">
-        <h3 className="analytics-section-title">Recent Visitors ({visits.length} total)</h3>
+        <h3 className="analytics-section-title">
+          {isGrouped 
+            ? `Visitors Grouped (${groupedVisitors.length} unique)` 
+            : `Recent Visits (${filteredVisits.length} total)`
+          }
+        </h3>
         <div className="visitors-table-wrap">
           <table className="visitors-table">
             <thead>
-              <tr>
-                <th>Time</th>
-                <th>IP</th>
-                <th>Location</th>
-                <th>Device</th>
-                <th>Brand / Model</th>
-                <th>OS</th>
-                <th>Browser</th>
-                <th>Referrer</th>
-                <th>Duration</th>
-                <th>Scroll</th>
-                <th>Type</th>
-              </tr>
+              {isGrouped ? (
+                <tr>
+                  <th>Visitor Tag</th>
+                  <th>Last Seen</th>
+                  <th>IP</th>
+                  <th>Location</th>
+                  <th>Device</th>
+                  <th>Brand / Model</th>
+                  <th>Visits</th>
+                  <th>Total Time</th>
+                  <th>Total Clicks</th>
+                  <th>Type</th>
+                </tr>
+              ) : (
+                <tr>
+                  <th>Time</th>
+                  <th>IP</th>
+                  <th>Location</th>
+                  <th>Device</th>
+                  <th>Brand / Model</th>
+                  <th>OS</th>
+                  <th>Browser</th>
+                  <th>Referrer</th>
+                  <th>Duration</th>
+                  <th>Scroll</th>
+                  <th>Type</th>
+                </tr>
+              )}
             </thead>
             <tbody>
-              {paginatedVisits.map((visit) => (
-                <React.Fragment key={visit.id}>
-                  <tr onClick={() => setExpandedId(expandedId === visit.id ? null : visit.id)}>
-                    <td>{formatDate(visit)}</td>
-                    <td><CopyIP ip={visit.ip} /></td>
-                    <td>{getCountryFlag(visit.countryCode)} {visit.city || '—'}, {visit.country || '—'}</td>
-                    <td><span className="badge badge-device">{visit.deviceType || '—'}</span></td>
-                    <td>{visit.deviceBrand ? `${visit.deviceBrand} ${visit.deviceModel || ''}`.trim() : '—'}</td>
-                    <td>{visit.os || '—'}</td>
-                    <td>{visit.browser || '—'}</td>
-                    <td>{visit.referrer || '—'}</td>
-                    <td>{formatDuration(visit.timeSpentSeconds)}</td>
-                    <td>{visit.maxScrollDepth || 0}%</td>
-                    <td>
-                      <span className={`badge ${visit.isReturning ? 'badge-returning' : 'badge-new'}`}>
-                        {visit.isReturning ? 'Returning' : 'New'}
-                      </span>
-                    </td>
-                  </tr>
-                  {expandedId === visit.id && (
-                    <tr>
-                      <td colSpan="11" style={{ padding: 0, border: 'none' }}>
-                        <div className="visitor-detail">
-                          <div className="visitor-detail-grid">
-                            <div className="detail-item">
-                              <span className="detail-label">Full IP</span>
-                              <span className="detail-value"><CopyIP ip={visit.ip} /></span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">ISP / Network</span>
-                              <span className="detail-value">{visit.isp || '—'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Device Brand</span>
-                              <span className="detail-value">{visit.deviceBrand || '—'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Device Model</span>
-                              <span className="detail-value">{visit.deviceModel || '—'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Region</span>
-                              <span className="detail-value">{visit.region}, {visit.country}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Postal Code</span>
-                              <span className="detail-value">{visit.postalCode || '—'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Timezone</span>
-                              <span className="detail-value">{visit.timezone || '—'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Screen Resolution</span>
-                              <span className="detail-value">{visit.screenResolution || '—'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Window Size</span>
-                              <span className="detail-value">{visit.windowSize || '—'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Pixel Ratio</span>
-                              <span className="detail-value">{visit.pixelRatio || '—'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Device Memory</span>
-                              <span className="detail-value">{visit.deviceMemory ? `${visit.deviceMemory} GB` : 'N/A'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">CPU Cores</span>
-                              <span className="detail-value">{visit.cpuCores || 'N/A'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Network Type</span>
-                              <span className="detail-value">{visit.networkType || 'Unknown'}{visit.networkActualType ? ` (${visit.networkActualType})` : ''}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Downlink / RTT</span>
-                              <span className="detail-value">{visit.downlink ? `${visit.downlink} Mbps` : '—'} / {visit.rtt ? `${visit.rtt}ms` : '—'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Battery</span>
-                              <span className="detail-value">{visit.batteryLevel !== null && visit.batteryLevel !== undefined ? `${visit.batteryLevel}%${visit.batteryCharging ? ' ⚡ Charging' : ''}` : 'N/A'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Referrer URL</span>
-                              <span className="detail-value">{visit.referrerUrl || 'Direct'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Page URL</span>
-                              <span className="detail-value">{visit.pageUrl || '—'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Visit #</span>
-                              <span className="detail-value">{visit.visitNumber || 1}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Total Clicks</span>
-                              <span className="detail-value">{visit.totalClicks || 0}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Visitor ID</span>
-                              <span className="detail-value">{visit.visitorId || '—'}</span>
-                            </div>
-                            {visit.utmParams && (
-                              <div className="detail-item">
-                                <span className="detail-label">UTM Params</span>
-                                <span className="detail-value">{JSON.stringify(visit.utmParams)}</span>
+              {isGrouped ? (
+                paginatedItems.map((group) => {
+                  const latest = group.latestVisit;
+                  const vColor = getVisitorColor(group.visitorId);
+                  const shortId = getVisitorShortId(group.visitorId);
+                  const isExpanded = expandedId === group.visitorId;
+
+                  return (
+                    <React.Fragment key={group.visitorId}>
+                      <tr onClick={() => setExpandedId(isExpanded ? null : group.visitorId)}>
+                        <td>
+                          <span className="visitor-tag-cell" style={{ '--tag-color': vColor }}>
+                            <span className="visitor-color-dot" />
+                            <span className="visitor-id-txt">{shortId}</span>
+                          </span>
+                        </td>
+                        <td>{formatDate(latest)}</td>
+                        <td><CopyIP ip={latest.ip} /></td>
+                        <td>{getCountryFlag(latest.countryCode)} {latest.city || '—'}, {latest.country || '—'}</td>
+                        <td><span className="badge badge-device">{latest.deviceType || '—'}</span></td>
+                        <td>{latest.deviceBrand ? `${latest.deviceBrand} ${latest.deviceModel || ''}`.trim() : '—'}</td>
+                        <td>
+                          <span className="badge badge-visits-count">
+                            {group.visits.length}
+                          </span>
+                        </td>
+                        <td>{formatDuration(group.totalTimeSpent)}</td>
+                        <td>{group.totalClicks}</td>
+                        <td>
+                          <span className={`badge ${latest.isReturning ? 'badge-returning' : 'badge-new'}`}>
+                            {latest.isReturning ? 'Returning' : 'New'}
+                          </span>
+                        </td>
+                      </tr>
+                      {isExpanded && (
+                        <tr>
+                          <td colSpan="10" style={{ padding: 0, border: 'none' }}>
+                            <div className="visitor-detail grouped-detail">
+                              <div className="visitor-detail-grid">
+                                <div className="detail-item">
+                                  <span className="detail-label">Full Visitor ID</span>
+                                  <span className="detail-value">{group.visitorId}</span>
+                                </div>
+                                <div className="detail-item">
+                                  <span className="detail-label">Latest IP</span>
+                                  <span className="detail-value"><CopyIP ip={latest.ip} /></span>
+                                </div>
+                                <div className="detail-item">
+                                  <span className="detail-label">ISP / Network</span>
+                                  <span className="detail-value">{latest.isp || '—'}</span>
+                                </div>
+                                <div className="detail-item">
+                                  <span className="detail-label">Device Brand</span>
+                                  <span className="detail-value">{latest.deviceBrand || '—'}</span>
+                                </div>
+                                <div className="detail-item">
+                                  <span className="detail-label">Device Model</span>
+                                  <span className="detail-value">{latest.deviceModel || '—'}</span>
+                                </div>
+                                <div className="detail-item">
+                                  <span className="detail-label">Region</span>
+                                  <span className="detail-value">{latest.region}, {latest.country}</span>
+                                </div>
+                                <div className="detail-item">
+                                  <span className="detail-label">Timezone</span>
+                                  <span className="detail-value">{latest.timezone || '—'}</span>
+                                </div>
+                                <div className="detail-item">
+                                  <span className="detail-label">Resolution</span>
+                                  <span className="detail-value">{latest.screenResolution || '—'}</span>
+                                </div>
+                                <div className="detail-item">
+                                  <span className="detail-label">RAM / CPU Cores</span>
+                                  <span className="detail-value">{latest.deviceMemory ? `${latest.deviceMemory} GB` : 'N/A'} / {latest.cpuCores || 'N/A'}</span>
+                                </div>
+                                <div className="detail-item">
+                                  <span className="detail-label">Network / Battery</span>
+                                  <span className="detail-value">{latest.networkType || 'Unknown'} / {latest.batteryLevel !== null ? `${latest.batteryLevel}%` : 'N/A'}</span>
+                                </div>
                               </div>
-                            )}
-                            <div className="detail-item" style={{ gridColumn: '1 / -1' }}>
-                              <span className="detail-label">User Agent</span>
-                              <span className="detail-value" style={{ fontSize: '0.7rem', color: '#888' }}>{visit.rawUserAgent || '—'}</span>
-                            </div>
-                            {visit.clickedElements && visit.clickedElements.length > 0 && (
-                              <div className="detail-item" style={{ gridColumn: '1 / -1' }}>
-                                <span className="detail-label">Clicked Elements</span>
-                                <span className="detail-value" style={{ fontSize: '0.7rem', color: '#888' }}>
-                                  {visit.clickedElements.map((el, i) => (
-                                    <span key={i} style={{ display: 'block', marginBottom: '0.2rem' }}>
-                                      {el.tag}{el.id ? `#${el.id}` : ''} {el.text ? `"${el.text}"` : ''} {el.href ? `→ ${el.href}` : ''}
-                                    </span>
-                                  ))}
-                                </span>
+
+                              <div className="history-timeline-section">
+                                <h4>Visit History Timeline ({group.visits.length} sessions)</h4>
+                                <div className="timeline-list">
+                                  {group.visits.map((hVisit, idx) => {
+                                    const historyKey = `h-${group.visitorId}-${idx}`;
+                                    const isHistoryExpanded = expandedHistoryId === historyKey;
+
+                                    return (
+                                      <div key={idx} className="timeline-item">
+                                        <div 
+                                          className="timeline-item-header"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setExpandedHistoryId(isHistoryExpanded ? null : historyKey);
+                                          }}
+                                        >
+                                          <div className="timeline-time">
+                                            <span className="timeline-index">#{group.visits.length - idx}</span>
+                                            {formatDate(hVisit)}
+                                          </div>
+                                          <div className="timeline-summary">
+                                            <span>Duration: <strong>{formatDuration(hVisit.timeSpentSeconds)}</strong></span>
+                                            <span>Scroll: <strong>{hVisit.maxScrollDepth || 0}%</strong></span>
+                                            <span>Clicks: <strong>{hVisit.totalClicks || 0}</strong></span>
+                                            <span className="timeline-exp-indicator">
+                                              {isHistoryExpanded ? '▲ hide' : '▼ details'}
+                                            </span>
+                                          </div>
+                                        </div>
+
+                                        {isHistoryExpanded && (
+                                          <div className="timeline-item-details">
+                                            <div className="timeline-details-grid">
+                                              <div><strong>URL Path:</strong> {hVisit.pagePath || '—'}</div>
+                                              <div><strong>Referrer:</strong> {hVisit.referrerUrl || 'Direct'}</div>
+                                              <div><strong>Resolution:</strong> {hVisit.screenResolution || '—'}</div>
+                                              <div><strong>Window Size:</strong> {hVisit.windowSize || '—'}</div>
+                                              <div><strong>Browser/OS:</strong> {hVisit.browser} / {hVisit.os}</div>
+                                              <div><strong>Device Memory:</strong> {hVisit.deviceMemory ? `${hVisit.deviceMemory} GB` : 'N/A'}</div>
+                                              <div><strong>Battery:</strong> {hVisit.batteryLevel !== null ? `${hVisit.batteryLevel}%` : 'N/A'}</div>
+                                              <div><strong>Network:</strong> {hVisit.networkType || 'Unknown'}</div>
+                                            </div>
+                                            {hVisit.clickedElements && hVisit.clickedElements.length > 0 && (
+                                              <div className="timeline-clicks">
+                                                <strong>Clicked Elements:</strong>
+                                                <div className="timeline-clicks-list">
+                                                  {hVisit.clickedElements.map((el, clickIdx) => (
+                                                    <div key={clickIdx} className="timeline-click-row">
+                                                      <span className="click-tag">{el.tag}</span>
+                                                      {el.id && <span className="click-id">#{el.id}</span>}
+                                                      {el.text && <span className="click-text">"{el.text}"</span>}
+                                                      {el.href && <span className="click-href">→ {el.href}</span>}
+                                                    </div>
+                                                  ))}
+                                                </div>
+                                              </div>
+                                            )}
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
                               </div>
-                            )}
-                          </div>
-                        </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })
+              ) : (
+                paginatedItems.map((visit) => (
+                  <React.Fragment key={visit.id}>
+                    <tr onClick={() => setExpandedId(expandedId === visit.id ? null : visit.id)}>
+                      <td>{formatDate(visit)}</td>
+                      <td><CopyIP ip={visit.ip} /></td>
+                      <td>{getCountryFlag(visit.countryCode)} {visit.city || '—'}, {visit.country || '—'}</td>
+                      <td><span className="badge badge-device">{visit.deviceType || '—'}</span></td>
+                      <td>{visit.deviceBrand ? `${visit.deviceBrand} ${visit.deviceModel || ''}`.trim() : '—'}</td>
+                      <td>{visit.os || '—'}</td>
+                      <td>{visit.browser || '—'}</td>
+                      <td>{visit.referrer || '—'}</td>
+                      <td>{formatDuration(visit.timeSpentSeconds)}</td>
+                      <td>{visit.maxScrollDepth || 0}%</td>
+                      <td>
+                        <span className={`badge ${visit.isReturning ? 'badge-returning' : 'badge-new'}`}>
+                          {visit.isReturning ? 'Returning' : 'New'}
+                        </span>
                       </td>
                     </tr>
-                  )}
-                </React.Fragment>
-              ))}
+                    {expandedId === visit.id && (
+                      <tr>
+                        <td colSpan="11" style={{ padding: 0, border: 'none' }}>
+                          <div className="visitor-detail">
+                            <div className="visitor-detail-grid">
+                              <div className="detail-item">
+                                <span className="detail-label">Full IP</span>
+                                <span className="detail-value"><CopyIP ip={visit.ip} /></span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">ISP / Network</span>
+                                <span className="detail-value">{visit.isp || '—'}</span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Device Brand</span>
+                                <span className="detail-value">{visit.deviceBrand || '—'}</span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Device Model</span>
+                                <span className="detail-value">{visit.deviceModel || '—'}</span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Region</span>
+                                <span className="detail-value">{visit.region}, {visit.country}</span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Postal Code</span>
+                                <span className="detail-value">{visit.postalCode || '—'}</span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Timezone</span>
+                                <span className="detail-value">{visit.timezone || '—'}</span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Screen Resolution</span>
+                                <span className="detail-value">{visit.screenResolution || '—'}</span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Window Size</span>
+                                <span className="detail-value">{visit.windowSize || '—'}</span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Pixel Ratio</span>
+                                <span className="detail-value">{visit.pixelRatio || '—'}</span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Device Memory</span>
+                                <span className="detail-value">{visit.deviceMemory ? `${visit.deviceMemory} GB` : 'N/A'}</span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">CPU Cores</span>
+                                <span className="detail-value">{visit.cpuCores || 'N/A'}</span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Network Type</span>
+                                <span className="detail-value">{visit.networkType || 'Unknown'}{visit.networkActualType ? ` (${visit.networkActualType})` : ''}</span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Downlink / RTT</span>
+                                <span className="detail-value">{visit.downlink ? `${visit.downlink} Mbps` : '—'} / {visit.rtt ? `${visit.rtt}ms` : '—'}</span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Battery</span>
+                                <span className="detail-value">{visit.batteryLevel !== null && visit.batteryLevel !== undefined ? `${visit.batteryLevel}%${visit.batteryCharging ? ' ⚡ Charging' : ''}` : 'N/A'}</span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Referrer URL</span>
+                                <span className="detail-value">{visit.referrerUrl || 'Direct'}</span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Page URL</span>
+                                <span className="detail-value">{visit.pageUrl || '—'}</span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Visit #</span>
+                                <span className="detail-value">{visit.visitNumber || 1}</span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Total Clicks</span>
+                                <span className="detail-value">{visit.totalClicks || 0}</span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Visitor ID</span>
+                                <span className="detail-value">{visit.visitorId || '—'}</span>
+                              </div>
+                              {visit.utmParams && (
+                                <div className="detail-item">
+                                  <span className="detail-label">UTM Params</span>
+                                  <span className="detail-value">{JSON.stringify(visit.utmParams)}</span>
+                                </div>
+                              )}
+                              <div className="detail-item" style={{ gridColumn: '1 / -1' }}>
+                                <span className="detail-label">User Agent</span>
+                                <span className="detail-value" style={{ fontSize: '0.7rem', color: '#888' }}>{visit.rawUserAgent || '—'}</span>
+                              </div>
+                              {visit.clickedElements && visit.clickedElements.length > 0 && (
+                                <div className="detail-item" style={{ gridColumn: '1 / -1' }}>
+                                  <span className="detail-label">Clicked Elements</span>
+                                  <span className="detail-value" style={{ fontSize: '0.7rem', color: '#888' }}>
+                                    {visit.clickedElements.map((el, i) => (
+                                      <span key={i} style={{ display: 'block', marginBottom: '0.2rem' }}>
+                                        {el.tag}{el.id ? `#${el.id}` : ''} {el.text ? `"${el.text}"` : ''} {el.href ? `→ ${el.href}` : ''}
+                                      </span>
+                                    ))}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                ))
+              )}
             </tbody>
           </table>
         </div>
