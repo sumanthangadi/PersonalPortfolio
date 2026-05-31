@@ -176,6 +176,14 @@ function StatList({ items, total }) {
   ));
 }
 
+const OWNER_IPS = ['106.51.204.179', '2406:7400:10a:9f95:c4e2:5350:8125:557e'];
+
+const isOwnerIp = (ip) => {
+  if (!ip) return false;
+  const cleanIp = ip.trim().toLowerCase();
+  return OWNER_IPS.some(ownerIp => cleanIp.includes(ownerIp.toLowerCase()));
+};
+
 // ── Main Dashboard ─────────────────────────────────────────
 
 export default function AnalyticsDashboard() {
@@ -190,6 +198,7 @@ export default function AnalyticsDashboard() {
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
   const [isGrouped, setIsGrouped] = useState(false);
+  const [hideOwnVisits, setHideOwnVisits] = useState(true);
 
   const fetchVisits = async () => {
     setLoading(true);
@@ -213,6 +222,10 @@ export default function AnalyticsDashboard() {
     const now = new Date();
 
     return visits.filter(visit => {
+      if (hideOwnVisits && isOwnerIp(visit.ip)) {
+        return false;
+      }
+
       let date;
       if (visit.visitedAt?.toDate) {
         date = visit.visitedAt.toDate();
@@ -259,7 +272,7 @@ export default function AnalyticsDashboard() {
 
       return true; // 'all'
     });
-  }, [visits, dateFilter, customStartDate, customEndDate]);
+  }, [visits, dateFilter, customStartDate, customEndDate, hideOwnVisits]);
 
   const groupedVisitors = useMemo(() => {
     if (!isGrouped) return [];
@@ -300,7 +313,7 @@ export default function AnalyticsDashboard() {
     setExpandedId(null);
     setExpandedHistoryId(null);
     setPage(0);
-  }, [isGrouped, dateFilter, customStartDate, customEndDate]);
+  }, [isGrouped, dateFilter, customStartDate, customEndDate, hideOwnVisits]);
 
   const stats = useMemo(() => computeStats(filteredVisits), [filteredVisits]);
 
@@ -454,6 +467,15 @@ export default function AnalyticsDashboard() {
         </div>
 
         <div className="controls-right">
+          <span className="control-label">Filters</span>
+          <button
+            className={`view-mode-toggle ${hideOwnVisits ? 'active' : ''}`}
+            onClick={() => setHideOwnVisits(!hideOwnVisits)}
+            style={{ marginRight: '0.8rem' }}
+          >
+            {hideOwnVisits ? '🛡️ EXCLUDING MY VISITS' : '👁️ SHOWING ALL (INCL. ME)'}
+          </button>
+
           <span className="control-label">View Mode</span>
           <button
             className={`view-mode-toggle ${isGrouped ? 'active' : ''}`}
@@ -482,6 +504,7 @@ export default function AnalyticsDashboard() {
                   <th>IP</th>
                   <th>Location</th>
                   <th>Device</th>
+                  <th>Resolution</th>
                   <th>Brand / Model</th>
                   <th>Visits</th>
                   <th>Total Time</th>
@@ -494,6 +517,7 @@ export default function AnalyticsDashboard() {
                   <th>IP</th>
                   <th>Location</th>
                   <th>Device</th>
+                  <th>Resolution</th>
                   <th>Brand / Model</th>
                   <th>OS</th>
                   <th>Browser</th>
@@ -525,6 +549,7 @@ export default function AnalyticsDashboard() {
                         <td><CopyIP ip={latest.ip} /></td>
                         <td>{getCountryFlag(latest.countryCode)} {latest.city || '—'}, {latest.country || '—'}</td>
                         <td><span className="badge badge-device">{latest.deviceType || '—'}</span></td>
+                        <td>{latest.screenResolution || '—'}</td>
                         <td>{latest.deviceBrand ? `${latest.deviceBrand} ${latest.deviceModel || ''}`.trim() : '—'}</td>
                         <td>
                           <span className="badge badge-visits-count">
@@ -541,7 +566,7 @@ export default function AnalyticsDashboard() {
                       </tr>
                       {isExpanded && (
                         <tr>
-                          <td colSpan="10" style={{ padding: 0, border: 'none' }}>
+                          <td colSpan="11" style={{ padding: 0, border: 'none' }}>
                             <div className="visitor-detail grouped-detail">
                               <div className="visitor-detail-grid">
                                 <div className="detail-item">
@@ -665,6 +690,7 @@ export default function AnalyticsDashboard() {
                       <td><CopyIP ip={visit.ip} /></td>
                       <td>{getCountryFlag(visit.countryCode)} {visit.city || '—'}, {visit.country || '—'}</td>
                       <td><span className="badge badge-device">{visit.deviceType || '—'}</span></td>
+                      <td>{visit.screenResolution || '—'}</td>
                       <td>{visit.deviceBrand ? `${visit.deviceBrand} ${visit.deviceModel || ''}`.trim() : '—'}</td>
                       <td>{visit.os || '—'}</td>
                       <td>{visit.browser || '—'}</td>
@@ -679,7 +705,7 @@ export default function AnalyticsDashboard() {
                     </tr>
                     {expandedId === visit.id && (
                       <tr>
-                        <td colSpan="11" style={{ padding: 0, border: 'none' }}>
+                        <td colSpan="12" style={{ padding: 0, border: 'none' }}>
                           <div className="visitor-detail">
                             <div className="visitor-detail-grid">
                               <div className="detail-item">
