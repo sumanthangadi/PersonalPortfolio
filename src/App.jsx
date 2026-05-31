@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import LookbookHero from './components/LookbookHero';
 import ContactForm from './components/ContactForm';
+import AnalyticsDashboard from './components/AnalyticsDashboard';
+import { initTracker } from './tracking/tracker';
 import './index.css';
 
 function App() {
@@ -14,6 +17,11 @@ function App() {
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Initialize visitor tracking
+  useEffect(() => {
+    initTracker();
   }, []);
 
   useEffect(() => {
@@ -89,6 +97,9 @@ function App() {
   }, []);
 
   return (
+    <Routes>
+      <Route path="/analytics" element={<AnalyticsDashboard />} />
+      <Route path="*" element={
     <>
       {isLoading && (
         <div style={{
@@ -280,6 +291,8 @@ function App() {
 
       <ContactForm isMobile={isMobile} />
     </>
+      } />
+    </Routes>
   );
 }
 
