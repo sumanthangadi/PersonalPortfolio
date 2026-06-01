@@ -176,7 +176,11 @@ function StatList({ items, total }) {
   ));
 }
 
-const OWNER_IPS = ['106.51.204.179', '2406:7400:10a:9f95:c4e2:5350:8125:557e'];
+const OWNER_IPS = [
+  '106.51.204.179', 
+  '2406:7400:10a:9f95:c4e2:5350:8125:557e',
+  '2409:40f2:104f:dc22:e443:effc:a94b:90eb'
+];
 
 const isOwnerIp = (ip) => {
   if (!ip) return false;
