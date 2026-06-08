@@ -16,7 +16,6 @@ const CopyableValue = ({ value, isRight, className, style }) => {
       alignItems: 'center', 
       gap: '0.5rem', 
       justifyContent: isRight ? 'flex-end' : 'flex-start', 
-      pointerEvents: 'auto',
       width: 'max-content'
     }}>
       <button 
@@ -103,27 +102,50 @@ const slideContent = [
       { label: 'BCA (2022 - 2025)', value: 'Bachelor of Computer Applications', nowrap: true },
       { label: '', value: 'KLE BCA Hubli', style: { fontSize: '1rem', marginTop: '-0.5rem', opacity: 0.8, textTransform: 'uppercase' }, link: 'https://maps.app.goo.gl/hotpV5P9Lu6qh56h9' }
     ],
-    right: []
+    right: [
+      { type: 'goldTag', value: 'SPECIALIZATION', containerStyle: { marginBottom: '0.4rem' } },
+      { label: 'MCA Specialized Course', value: 'Scalable Data Processing', style: { fontSize: '2.2rem', fontWeight: 700, letterSpacing: '0.05em' }, nowrap: false },
+      { label: '', value: 'The ability of an architecture to handle growing volumes, velocities, and varieties of data without sacrificing performance', style: { fontFamily: '"Montserrat", sans-serif', fontSize: '0.9rem', lineHeight: '1.6', maxWidth: '300px', opacity: 0.8 } }
+    ]
   },
   {
     left: [
       { type: 'heading', value: 'SKILLS' },
       {
-        label: 'Tech Stack', type: 'skills', skills: [
-          { name: 'React', icon: 'react' },
-          { name: 'React-Native', icon: 'reactNative' },
-          { name: 'Node JS', icon: 'nodejs' },
-          { name: 'Data Structures', icon: 'data' },
-          { name: 'Firebase', icon: 'firebase' }
+        label: 'Tech Stack', type: 'skillCategories', categories: [
+          { category: 'Frontend', skills: [
+            { name: 'React.js', icon: 'react' },
+            { name: 'React Native', icon: 'reactNative' }
+          ]},
+          { category: 'Backend', skills: [
+            { name: 'Node.js', icon: 'nodejs' },
+            { name: 'Firebase', icon: 'firebase' },
+            { name: 'Appwrite', icon: 'appwrite' }
+          ]},
+          { category: 'Languages', skills: [
+            { name: 'JavaScript', icon: 'javascript' },
+            { name: 'C', icon: 'cLang' }
+          ]}
         ]
       }
     ],
     right: [
       {
+        label: '', type: 'skillCategories', categories: [
+          { category: 'Tools', skills: [
+            { name: 'Git', icon: 'git' },
+            { name: 'OAuth', icon: 'oauth' },
+            { name: 'Chrome Extensions', icon: 'chromeExt' },
+            { name: 'Deployment', icon: 'deploy' },
+            { name: 'Razorpay & Stripe', icon: 'payment' }
+          ]}
+        ]
+      },
+      {
         label: 'Philosophy',
         value: '"Learning is a never ending\npath for me"',
         style: { fontSize: '1.2rem', whiteSpace: 'pre-line', lineHeight: '1.4' },
-        containerStyle: { position: 'absolute', top: '-25vh', right: 0, width: '250px' }
+        containerStyle: { marginTop: '1.5rem' }
       }
     ]
   },
@@ -199,6 +221,14 @@ const getIcon = (name, size = 18) => {
     case 'nodejs': return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>;
     case 'data': return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="16" y="3" width="6" height="6" rx="1"></rect><rect x="2" y="9" width="6" height="6" rx="1"></rect><rect x="16" y="15" width="6" height="6" rx="1"></rect><path d="M8 12h4l4-6"></path><path d="M12 12l4 6"></path></svg>;
     case 'firebase': return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>;
+    case 'appwrite': return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>;
+    case 'javascript': return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M12 8v8"></path><path d="M8 16c0-2 4-2 4-4s-4-2-4 0"></path></svg>;
+    case 'cLang': return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M15 8c-1.5-1-3.5-1-5 0s-2.5 3-1.5 5 3 3 5 2.5"></path></svg>;
+    case 'git': return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg>;
+    case 'oauth': return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>;
+    case 'chromeExt': return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="21.17" y1="8" x2="12" y2="8"></line><line x1="3.95" y1="6.06" x2="8.54" y2="14"></line><line x1="10.88" y1="21.94" x2="15.46" y2="14"></line></svg>;
+    case 'deploy': return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg>;
+    case 'payment': return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>;
     default: return null;
   }
 };
@@ -225,6 +255,27 @@ const renderPanelItem = (item, idx, isRight, isActive) => {
     return (
       <div key={idx} style={{ display: 'flex', flexDirection: 'column', ...alignStyle, ...animStyle, ...(item.containerStyle || {}) }}>
         <h2 style={{ fontSize: '1.4rem', margin: '0 0 0 0', letterSpacing: '0.15em', fontWeight: 600, color: '#000', opacity: 0.5, ...(item.style || {}) }}>{item.value}</h2>
+      </div>
+    );
+  }
+
+  if (item.type === 'goldTag') {
+    return (
+      <div key={idx} style={{ display: 'flex', flexDirection: 'column', ...alignStyle, ...animStyle, ...(item.containerStyle || {}) }}>
+        <div style={{
+          display: 'inline-block',
+          background: 'linear-gradient(135deg, #c9a84c, #f0d878)',
+          color: '#111',
+          fontSize: '0.6rem',
+          fontWeight: 700,
+          letterSpacing: '0.15em',
+          textTransform: 'uppercase',
+          padding: '0.25rem 0.8rem',
+          borderRadius: '50px',
+          width: 'max-content',
+          marginBottom: '0.5rem',
+          ...item.style
+        }}>{item.value}</div>
       </div>
     );
   }
@@ -295,6 +346,26 @@ const renderPanelItem = (item, idx, isRight, isActive) => {
             </div>
           ))}
         </div>
+      </div>
+    );
+  }
+
+  if (item.type === 'skillCategories') {
+    return (
+      <div key={idx} style={{ display: 'flex', flexDirection: 'column', ...alignStyle, ...animStyle, gap: '1.2rem' }}>
+        {item.categories.map((cat, cIdx) => (
+          <div key={cIdx} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            <div className="editorial-label" style={{ fontSize: '0.65rem', letterSpacing: '0.15em', opacity: 0.5 }}>{cat.category}</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', justifyContent: isRight ? 'flex-end' : 'flex-start' }}>
+              {cat.skills.map((skill, sIdx) => (
+                <div key={sIdx} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.2rem' }}>
+                  <span style={{ opacity: 0.7, display: 'flex' }}>{getIcon(skill.icon)}</span>
+                  {skill.name}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
@@ -448,6 +519,14 @@ function MobileLayout({ isLoading }) {
             <div className="editorial-label" style={{ color: '#888' }}>MCA (2025 - 2027)</div>
             <div className="editorial-value" style={{ color: '#fff' }}>Master of Computer Application</div>
             <a href="https://maps.app.goo.gl/jn3pAzoAXdEUeVUK8" target="_blank" rel="noreferrer" className="editorial-label" style={{ marginTop: '0.2rem', textTransform: 'uppercase', opacity: 0.8, color: '#888', textDecoration: 'none', borderBottom: '1px solid #444', paddingBottom: '2px', display: 'inline-block' }}>PES University Bengaluru ↗</a>
+            
+            <div style={{ marginTop: '1rem', borderLeft: '2px solid #333', paddingLeft: '0.8rem' }}>
+              <div style={{ display: 'inline-block', background: 'linear-gradient(135deg, #c9a84c, #f0d878)', color: '#111', fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '0.15rem 0.5rem', borderRadius: '50px', marginBottom: '0.4rem' }}>MCA Specialization</div>
+              <div style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 600, marginTop: '0.1rem' }}>Scalable Data Processing</div>
+              <div style={{ color: '#888', fontSize: '0.75rem', lineHeight: 1.4, marginTop: '0.2rem', textTransform: 'none' }}>
+                the ability of an architecture to handle growing volumes, velocities, and varieties of data without sacrificing performance
+              </div>
+            </div>
           </div>
           <div className="mobile-divider" style={{ background: '#fff' }}></div>
           <div>
@@ -462,15 +541,19 @@ function MobileLayout({ isLoading }) {
       <section className="mobile-section" style={{ minHeight: 'auto' }}>
         <div className="mobile-section-label">{sectionLabels[2]}</div>
         <div className="mobile-content mobile-reveal" ref={addRevealRef}>
-          <div className="editorial-label">Tech Stack</div>
-          <div className="mobile-skills-grid">
-            {slideContent[2].left[1].skills.map((skill, i) => (
-              <div key={i} className="skill-chip">
-                <span style={{ display: 'flex' }}>{getIcon(skill.icon, 16)}</span>
-                {skill.name}
+          {[...slideContent[2].left[1].categories, ...slideContent[2].right[0].categories].map((cat, cIdx, allCats) => (
+            <div key={cIdx} style={{ marginBottom: cIdx < allCats.length - 1 ? '1rem' : 0 }}>
+              <div className="editorial-label" style={{ fontSize: '0.6rem', letterSpacing: '0.2em', opacity: 0.45, marginBottom: '0.4rem' }}>{cat.category}</div>
+              <div className="mobile-skills-grid">
+                {cat.skills.map((skill, i) => (
+                  <div key={i} className="skill-chip">
+                    <span style={{ display: 'flex' }}>{getIcon(skill.icon, 16)}</span>
+                    {skill.name}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
           <div style={{ marginTop: '1.5rem' }}>
             <div className="editorial-label">Philosophy</div>
             <div style={{ fontSize: '1.1rem', lineHeight: 1.5, fontStyle: 'italic', opacity: 0.7, marginTop: '0.3rem' }}>
@@ -706,7 +789,8 @@ export default function LookbookHero({ isLoading }) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  zIndex: isActive ? 10 : 1
+                  zIndex: isActive ? 10 : 1,
+                  pointerEvents: 'none'
                 }}
               >
                 <img
@@ -727,31 +811,7 @@ export default function LookbookHero({ isLoading }) {
           })}
         </div>
 
-        {/* Floating Icons — Skills Slide */}
-        {[
-          { icon: 'react', top: '15%', left: '5%', size: 36, delay: '0s', dur: '6s' },
-          { icon: 'nodejs', top: '20%', left: '88%', size: 30, delay: '1s', dur: '7s' },
-          { icon: 'firebase', top: '70%', left: '6%', size: 28, delay: '2s', dur: '5s' },
-          { icon: 'reactNative', top: '75%', left: '87%', size: 32, delay: '0.5s', dur: '8s' },
-          { icon: 'data', top: '45%', left: '3%', size: 24, delay: '1.5s', dur: '6.5s' },
-          { icon: 'github', top: '10%', left: '50%', size: 26, delay: '0.8s', dur: '7.5s' },
-          { icon: 'react', top: '80%', left: '45%', size: 20, delay: '2.5s', dur: '5.5s' },
-          { icon: 'firebase', top: '35%', left: '92%', size: 22, delay: '3s', dur: '9s' },
-        ].map((item, i) => (
-          <div key={`float-${i}`} style={{
-            position: 'absolute',
-            top: item.top,
-            left: item.left,
-            opacity: activeIndex === 2 ? 0.15 : 0,
-            transition: 'opacity 0.8s ease',
-            animation: `floatIcon ${item.dur} ease-in-out ${item.delay} infinite`,
-            zIndex: 5,
-            pointerEvents: 'none',
-            color: '#000'
-          }}>
-            {getIcon(item.icon, item.size)}
-          </div>
-        ))}
+
 
         {/* Text Panels */}
         <div style={{
@@ -761,7 +821,8 @@ export default function LookbookHero({ isLoading }) {
           transform: 'translateY(-50%)',
           opacity: 1, // The container itself is always visible, but we transition inner content
           zIndex: 20,
-          pointerEvents: 'none'
+          pointerEvents: 'none',
+          maxWidth: '45%'
         }}>
           {slideContent.map((content, i) => (
             <div
@@ -784,7 +845,7 @@ export default function LookbookHero({ isLoading }) {
         <div style={{
           position: 'absolute',
           top: '40%',
-          right: activeIndex === 3 ? '14%' : '2%',
+          right: (activeIndex === 2 || activeIndex === 3) ? '14%' : '2%',
           transform: 'translateY(-50%)',
           opacity: 1,
           zIndex: 20,
