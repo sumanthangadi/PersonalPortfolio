@@ -556,8 +556,7 @@ const NewspaperPortfolio = () => {
             </a>
           </div>
           <p className="colophon__text">
-            © 2026 · Sumanth Angadi · All Rights Reserved<br />
-            Typefaces: Playfair Display, Inter
+            © 2026 · Sumanth Angadi · All Rights Reserved
           </p>
         </div>
         <hr className="rule" />
