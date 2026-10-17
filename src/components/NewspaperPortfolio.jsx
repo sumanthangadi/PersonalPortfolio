@@ -104,7 +104,6 @@ const NewspaperPortfolio = () => {
         <hr className="rule" />
 
         <h1 className="masthead__title">INDIA TODAY</h1>
-        <p className="masthead__tagline">SOFTWARE · IDEAS · EXPERIMENTS · TECHNOLOGY</p>
 
         <hr className="rule" />
 
@@ -158,9 +157,9 @@ const NewspaperPortfolio = () => {
 
           <div className="lead-portrait">
             <div className="portrait-frame">
-              <img src="/cutouts/mobile.png" alt="Sumanth — Developer & Creator" />
+              <img src="/cutouts/mobile.png" alt="Sumanth — Data & Intelligence" />
             </div>
-            <p className="portrait-caption">Sumanth · Developer & Creator</p>
+            <p className="portrait-caption">Sumanth · Data & Intelligence</p>
           </div>
         </div>
       </section>
@@ -558,7 +557,6 @@ const NewspaperPortfolio = () => {
           </div>
           <p className="colophon__text">
             © 2026 · Sumanth Angadi · All Rights Reserved<br />
-            Built with React + Vite · Deployed on Vercel<br />
             Typefaces: Playfair Display, Inter
           </p>
         </div>
