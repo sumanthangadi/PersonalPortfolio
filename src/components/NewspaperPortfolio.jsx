@@ -141,6 +141,7 @@ const NewspaperPortfolio = () => {
 
         <div className="lead-content">
           <div className="lead-text">
+            <h1 className="lead-headline">A developer's notebook.</h1>
             <p className="lead-intro">
               A 23-year-old developer based in Bengaluru, exploring the intersection of the web and useful ideas. Currently pursuing a Master of Computer Applications at PES University, with a specialization in Scalable Data Processing — the ability of an architecture to handle growing volumes, velocities, and varieties of data without sacrificing performance.
             </p>

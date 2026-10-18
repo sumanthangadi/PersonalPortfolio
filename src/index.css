@@ -376,7 +376,7 @@ p {
 }
 
 .portrait-frame {
-  max-width: 360px;
+  max-width: 470px;
   width: 100%;
   position: relative;
   background: var(--paper);
